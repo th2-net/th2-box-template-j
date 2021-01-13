@@ -5,7 +5,7 @@ plugins {
     id 'application'
 }
 
-group box_group
+group 'com.exactpro.th2'
 version release_version
 
 sourceCompatibility = JavaVersion.VERSION_11
