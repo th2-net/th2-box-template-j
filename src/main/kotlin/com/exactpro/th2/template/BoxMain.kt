@@ -24,7 +24,7 @@ import com.exactpro.th2.common.metrics.liveness
 import com.exactpro.th2.common.metrics.readiness
 import com.exactpro.th2.common.schema.factory.CommonFactory
 import mu.KotlinLogging
-import java.util.*
+import java.util.Deque
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.ReentrantLock
