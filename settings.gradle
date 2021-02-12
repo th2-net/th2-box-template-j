@@ -1,2 +1,15 @@
 rootProject.name = 'box-template'
 
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+    repositories {
+        mavenCentral()
+
+        maven {
+            name 'Bintray'
+            url 'https://dl.bintray.com/exactpro/th2'
+        }
+    }
+}
+

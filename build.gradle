@@ -24,15 +24,6 @@ compileTestKotlin {
     }
 }
 
-repositories {
-    mavenCentral()
-
-    maven {
-        name 'Bintray'
-        url 'https://dl.bintray.com/exactpro/th2'
-    }
-}
-
 dependencies {
     // BOM with external dependencies restrictions
     api platform('com.exactpro.th2:bom:2.10.1')
