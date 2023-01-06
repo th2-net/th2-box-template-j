@@ -15,11 +15,11 @@
  */
 
 @file:JvmName("BoxMain")
+
 package com.exactpro.th2.template
 
 import com.exactpro.th2.common.event.Event
 import com.exactpro.th2.common.event.EventUtils
-import com.exactpro.th2.common.grpc.EventID
 import com.exactpro.th2.common.metrics.registerLiveness
 import com.exactpro.th2.common.metrics.registerReadiness
 import com.exactpro.th2.common.schema.factory.CommonFactory
@@ -32,6 +32,7 @@ import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 private val LOGGER = KotlinLogging.logger { }
+
 @Suppress("SpellCheckingInspection")
 private val LIVENESS = registerLiveness("main")
 private val READINESS = registerReadiness("main")
@@ -43,7 +44,7 @@ fun main(args: Array<String>) {
     // Configure shutdown hook for closing all resources
     // and the lock condition to await termination.
     //
-    // If you use the logic that doesn't require additional threads
+    // If you use the logic that doesn't require additional threads,
     // and you can run everything on main thread
     // you can omit the part with locks (but please keep the resources queue)
     val resources: Deque<AutoCloseable> = ConcurrentLinkedDeque()
@@ -67,9 +68,7 @@ fun main(args: Array<String>) {
         eventRouter.sendAll(
             Event.start()
                 .bodyData(EventUtils.createMessageBean("I am a template th2-box"))
-                .toBatchProto(EventID.newBuilder().apply {
-                    id = factory.rootEventId
-                }.build())
+                .toBatchProto(factory.rootEventId)
         )
 
         // Do additional initialization required to your logic
