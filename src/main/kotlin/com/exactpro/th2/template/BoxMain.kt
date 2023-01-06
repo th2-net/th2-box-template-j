@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package com.exactpro.th2.template
 
 import com.exactpro.th2.common.event.Event
 import com.exactpro.th2.common.event.EventUtils
-import com.exactpro.th2.common.grpc.EventBatch
-import com.exactpro.th2.common.metrics.liveness
-import com.exactpro.th2.common.metrics.readiness
+import com.exactpro.th2.common.grpc.EventID
+import com.exactpro.th2.common.metrics.registerLiveness
+import com.exactpro.th2.common.metrics.registerReadiness
 import com.exactpro.th2.common.schema.factory.CommonFactory
 import mu.KotlinLogging
 import java.util.Deque
@@ -32,6 +32,9 @@ import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 private val LOGGER = KotlinLogging.logger { }
+@Suppress("SpellCheckingInspection")
+private val LIVENESS = registerLiveness("main")
+private val READINESS = registerReadiness("main")
 
 fun main(args: Array<String>) {
     LOGGER.info { "Starting the box" }
@@ -58,23 +61,21 @@ fun main(args: Array<String>) {
         resources += factory
 
         // The BOX is alive
-        liveness = true
+        LIVENESS.enable()
 
         val eventRouter = factory.eventBatchRouter
-        eventRouter.send(
-            EventBatch.newBuilder()
-                .addEvents(
-                    Event.start().endTimestamp()
-                        .bodyData(EventUtils.createMessageBean("I am a template th2-box"))
-                        .toProtoEvent(null/* no parent, the root event */)
-                )
-                .build()
+        eventRouter.sendAll(
+            Event.start()
+                .bodyData(EventUtils.createMessageBean("I am a template th2-box"))
+                .toBatchProto(EventID.newBuilder().apply {
+                    id = factory.rootEventId
+                }.build())
         )
 
         // Do additional initialization required to your logic
 
         // The BOX is ready to work
-        readiness = true
+        READINESS.enable()
 
         awaitShutdown(lock, condition)
     } catch (ex: Exception) {
@@ -89,7 +90,7 @@ private fun configureShutdownHook(resources: Deque<AutoCloseable>, lock: Reentra
         name = "Shutdown hook"
     ) {
         LOGGER.info { "Shutdown start" }
-        readiness = false
+        READINESS.disable()
         try {
             lock.lock()
             condition.signalAll()
@@ -103,7 +104,7 @@ private fun configureShutdownHook(resources: Deque<AutoCloseable>, lock: Reentra
                 LOGGER.error(e) { "Cannot close resource ${resource::class}" }
             }
         }
-        liveness = false
+        LIVENESS.disable()
         LOGGER.info { "Shutdown end" }
     })
 }
