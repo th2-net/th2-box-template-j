@@ -19,10 +19,11 @@
 package com.exactpro.th2.template
 
 import com.exactpro.th2.common.event.Event
-import com.exactpro.th2.common.event.EventUtils
+import com.exactpro.th2.common.event.EventUtils.createMessageBean
 import com.exactpro.th2.common.metrics.registerLiveness
 import com.exactpro.th2.common.metrics.registerReadiness
 import com.exactpro.th2.common.schema.factory.CommonFactory
+import com.exactpro.th2.common.schema.factory.extensions.getCustomConfiguration
 import mu.KotlinLogging
 import java.util.Deque
 import java.util.concurrent.ConcurrentLinkedDeque
@@ -36,6 +37,8 @@ private val LOGGER = KotlinLogging.logger { }
 @Suppress("SpellCheckingInspection")
 private val LIVENESS = registerLiveness("main")
 private val READINESS = registerReadiness("main")
+
+private const val LOAD_DICTIONATY_EVENT = "Load dictionaries"
 
 fun main(args: Array<String>) {
     LOGGER.info { "Starting the box" }
@@ -67,9 +70,37 @@ fun main(args: Array<String>) {
         val eventRouter = factory.eventBatchRouter
         eventRouter.sendAll(
             Event.start()
-                .bodyData(EventUtils.createMessageBean("I am a template th2-box"))
+                .bodyData(createMessageBean("I am a template th2-box"))
                 .toBatchProto(factory.rootEventId)
         )
+
+        // Loading dictionnaies example
+        val loadDictionaryEvent = Event.start()
+            .name("Load dictionaries")
+            .type(LOAD_DICTIONATY_EVENT)
+        val configuration = factory.getCustomConfiguration<Configuration>()
+
+        factory.loadDictionary(configuration.dictinary).close()
+        loadDictionaryEvent.addSubEventWithSamePeriod()
+            .name("Loaded single dictionary by ${configuration.dictinary} alias")
+            .type(LOAD_DICTIONATY_EVENT)
+
+        val loadDictionarySetEvent = loadDictionaryEvent.addSubEventWithSamePeriod()
+            .name("Loaded dictionary set")
+            .type(LOAD_DICTIONATY_EVENT)
+        configuration.dictionarySet.forEach { alias ->
+            factory.loadDictionary(alias).close()
+            loadDictionarySetEvent.bodyData(createMessageBean("Loaded dictionary by $alias alias"))
+        }
+
+        val loadDictionaryMapEvent = loadDictionaryEvent.addSubEventWithSamePeriod()
+            .name("Loaded dictionary map")
+            .type(LOAD_DICTIONATY_EVENT)
+        configuration.dictionaryMap.forEach { (name, alias) ->
+            factory.loadDictionary(alias).close()
+            loadDictionaryMapEvent.bodyData(createMessageBean("Loaded $name dictionary by $alias alias"))
+        }
+        eventRouter.sendAll(loadDictionaryEvent.toBatchProto(factory.rootEventId))
 
         // Do additional initialization required to your logic
 
