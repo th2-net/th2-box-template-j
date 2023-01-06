@@ -18,7 +18,6 @@ package com.exactpro.th2.template
 
 import com.exactpro.th2.common.event.Event
 import com.exactpro.th2.common.event.EventUtils
-import com.exactpro.th2.common.grpc.EventID
 import com.exactpro.th2.common.metrics.registerLiveness
 import com.exactpro.th2.common.metrics.registerReadiness
 import com.exactpro.th2.common.schema.factory.CommonFactory
@@ -34,9 +33,7 @@ class Application(
         eventRouter.sendAll(
             Event.start()
                 .bodyData(EventUtils.createMessageBean("I am a template th2 component"))
-                .toBatchProto(EventID.newBuilder().apply {
-                    id = factory.rootEventId
-                }.build())
+                .toBatchProto(factory.rootEventId)
         )
 
         // Do additional initialization required to your logic
