@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-internal class TestBoxMain {
+internal class TestMainKt {
     @Test
-    internal fun `test your box`() {
+    internal fun `test your component`() {
         LOGGER.info { "Test 1 equals 1" }
         assertEquals(1, 1)
     }

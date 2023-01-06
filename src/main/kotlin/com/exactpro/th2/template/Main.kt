@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-@file:JvmName("BoxMain")
+@file:JvmName("Main")
 package com.exactpro.th2.template
 
-import com.exactpro.th2.common.event.Event
-import com.exactpro.th2.common.event.EventUtils
-import com.exactpro.th2.common.grpc.EventBatch
-import com.exactpro.th2.common.metrics.liveness
-import com.exactpro.th2.common.metrics.readiness
 import com.exactpro.th2.common.schema.factory.CommonFactory
 import mu.KotlinLogging
 import java.util.Deque
@@ -34,8 +29,8 @@ import kotlin.system.exitProcess
 private val LOGGER = KotlinLogging.logger { }
 
 fun main(args: Array<String>) {
-    LOGGER.info { "Starting the box" }
-    // Here is an entry point to the th2-box.
+    LOGGER.info { "Starting th2 component" }
+    // Here is an entry point to th2 component.
 
     // Configure shutdown hook for closing all resources
     // and the lock condition to await termination.
@@ -54,31 +49,15 @@ fun main(args: Array<String>) {
         // You can use custom paths to each config that is required for the CommonFactory
         // If args are empty the default path will be chosen.
         val factory = CommonFactory.createFromArguments(*args)
-        // do not forget to add resource to the resources queue
-        resources += factory
+            .also(resources::add) // do not forget to add resource to the resources queue
 
-        // The BOX is alive
-        liveness = true
-
-        val eventRouter = factory.eventBatchRouter
-        eventRouter.send(
-            EventBatch.newBuilder()
-                .addEvents(
-                    Event.start().endTimestamp()
-                        .bodyData(EventUtils.createMessageBean("I am a template th2-box"))
-                        .toProtoEvent(null/* no parent, the root event */)
-                )
-                .build()
-        )
-
-        // Do additional initialization required to your logic
-
-        // The BOX is ready to work
-        readiness = true
+        Application(factory)
+            .also(resources::add)
+            .use(Application::run)
 
         awaitShutdown(lock, condition)
     } catch (ex: Exception) {
-        LOGGER.error(ex) { "Cannot start the box" }
+        LOGGER.error(ex) { "Cannot start th2 component" }
         exitProcess(1)
     }
 }
@@ -89,7 +68,6 @@ private fun configureShutdownHook(resources: Deque<AutoCloseable>, lock: Reentra
         name = "Shutdown hook"
     ) {
         LOGGER.info { "Shutdown start" }
-        readiness = false
         try {
             lock.lock()
             condition.signalAll()
@@ -103,7 +81,6 @@ private fun configureShutdownHook(resources: Deque<AutoCloseable>, lock: Reentra
                 LOGGER.error(e) { "Cannot close resource ${resource::class}" }
             }
         }
-        liveness = false
         LOGGER.info { "Shutdown end" }
     })
 }
