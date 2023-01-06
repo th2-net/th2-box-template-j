@@ -19,6 +19,8 @@ package com.exactpro.th2.template
 import com.exactpro.th2.common.event.Event
 import com.exactpro.th2.common.event.EventUtils
 import com.exactpro.th2.common.grpc.EventID
+import com.exactpro.th2.common.metrics.registerLiveness
+import com.exactpro.th2.common.metrics.registerReadiness
 import com.exactpro.th2.common.schema.factory.CommonFactory
 
 class Application(
@@ -43,5 +45,14 @@ class Application(
         READINESS.enable()
     }
 
-    override fun close() { }
+    override fun close() {
+        READINESS.disable()
+        LIVENESS.disable()
+    }
+
+    companion object {
+        @Suppress("SpellCheckingInspection")
+        private val LIVENESS = registerLiveness("main")
+        private val READINESS = registerReadiness("main")
+    }
 }

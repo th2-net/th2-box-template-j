@@ -17,10 +17,6 @@
 @file:JvmName("BoxMain")
 package com.exactpro.th2.template
 
-import com.exactpro.th2.common.event.Event
-import com.exactpro.th2.common.event.EventUtils
-import com.exactpro.th2.common.metrics.registerLiveness
-import com.exactpro.th2.common.metrics.registerReadiness
 import com.exactpro.th2.common.schema.factory.CommonFactory
 import mu.KotlinLogging
 import java.util.Deque
@@ -31,9 +27,6 @@ import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 private val LOGGER = KotlinLogging.logger { }
-@Suppress("SpellCheckingInspection")
-private val LIVENESS = registerLiveness("main")
-private val READINESS = registerReadiness("main")
 
 fun main(args: Array<String>) {
     LOGGER.info { "Starting the box" }
@@ -56,23 +49,11 @@ fun main(args: Array<String>) {
         // You can use custom paths to each config that is required for the CommonFactory
         // If args are empty the default path will be chosen.
         val factory = CommonFactory.createFromArguments(*args)
-        // do not forget to add resource to the resources queue
-        resources += factory
+            .also(resources::add) // do not forget to add resource to the resources queue
 
-        // The BOX is alive
-        LIVENESS.enable()
-
-        val eventRouter = factory.eventBatchRouter
-        eventRouter.sendAll(
-            Event.start()
-                .bodyData(EventUtils.createMessageBean("I am a template th2-box"))
-                .toBatchProto(factory.rootEventId)
-        )
-
-        // Do additional initialization required to your logic
-
-        // The BOX is ready to work
-        READINESS.enable()
+        Application(factory)
+            .also(resources::add)
+            .use(Application::run)
 
         awaitShutdown(lock, condition)
     } catch (ex: Exception) {
@@ -87,7 +68,6 @@ private fun configureShutdownHook(resources: Deque<AutoCloseable>, lock: Reentra
         name = "Shutdown hook"
     ) {
         LOGGER.info { "Shutdown start" }
-        READINESS.disable()
         try {
             lock.lock()
             condition.signalAll()
@@ -101,7 +81,6 @@ private fun configureShutdownHook(resources: Deque<AutoCloseable>, lock: Reentra
                 LOGGER.error(e) { "Cannot close resource ${resource::class}" }
             }
         }
-        LIVENESS.disable()
         LOGGER.info { "Shutdown end" }
     })
 }
