@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
     id 'org.jetbrains.kotlin.jvm' version '1.6.21'
     id 'com.palantir.docker' version '0.25.0'
     id 'application'
@@ -11,14 +12,7 @@ version release_version
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "11"
-
-    }
-}
-
-compileTestKotlin {
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
     kotlinOptions {
         jvmTarget = "11"
     }
