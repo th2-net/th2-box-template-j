@@ -29,10 +29,9 @@ dependencies {
     implementation "org.slf4j:slf4j-api"
 
     // Idiomatic logging for Kotlin. Wraps slf4j
-    implementation 'io.github.microutils:kotlin-logging:3.0.4'
+    implementation 'io.github.microutils:kotlin-logging:3.0.0'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
 }
 
 test {
