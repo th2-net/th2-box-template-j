@@ -1,0 +1,11 @@
+variables:
+  APP_NAME: th2-box-template
+  MAJOR_VERSION: 0
+  MINOR_VERSION: 0
+  MAINTENANCE_VERSION: 1
+  DOCKER_PUBLISH_ENABLED: "false" # set "true" in actual project
+
+include:
+  - project: vivarium/th2/pipelines
+    ref: master
+    file: /.gitlab-ci-common.yml
