@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@file:JvmName("BoxMain")
+@file:JvmName("Main")
 package com.exactpro.th2.template
 
 import com.exactpro.th2.common.schema.factory.CommonFactory
@@ -29,8 +29,8 @@ import kotlin.system.exitProcess
 private val LOGGER = KotlinLogging.logger { }
 
 fun main(args: Array<String>) {
-    LOGGER.info { "Starting the box" }
-    // Here is an entry point to the th2-box.
+    LOGGER.info { "Starting th2 component" }
+    // Here is an entry point to th2 component.
 
     // Configure shutdown hook for closing all resources
     // and the lock condition to await termination.
@@ -57,7 +57,7 @@ fun main(args: Array<String>) {
 
         awaitShutdown(lock, condition)
     } catch (ex: Exception) {
-        LOGGER.error(ex) { "Cannot start the box" }
+        LOGGER.error(ex) { "Cannot start th2 component" }
         exitProcess(1)
     }
 }

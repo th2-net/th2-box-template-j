@@ -56,7 +56,7 @@ jar {
 }
 
 application {
-    mainClass.set('com.exactpro.th2.template.BoxMain')
+    mainClass.set('com.exactpro.th2.template.Main')
 }
 
 applicationName = 'service'

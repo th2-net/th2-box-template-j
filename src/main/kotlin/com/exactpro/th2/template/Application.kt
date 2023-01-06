@@ -27,13 +27,13 @@ class Application(
     private val factory: CommonFactory,
 ): AutoCloseable {
     fun run() {
-        // The BOX is alive
+        // th2 component is alive
         LIVENESS.enable()
 
         val eventRouter = factory.eventBatchRouter
         eventRouter.sendAll(
             Event.start()
-                .bodyData(EventUtils.createMessageBean("I am a template th2-box"))
+                .bodyData(EventUtils.createMessageBean("I am a template th2 component"))
                 .toBatchProto(EventID.newBuilder().apply {
                     id = factory.rootEventId
                 }.build())
@@ -41,7 +41,7 @@ class Application(
 
         // Do additional initialization required to your logic
 
-        // The BOX is ready to work
+        // th2 component is ready to work
         READINESS.enable()
     }
 

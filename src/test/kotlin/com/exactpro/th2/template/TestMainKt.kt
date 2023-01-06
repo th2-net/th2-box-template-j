@@ -20,9 +20,9 @@ import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-internal class TestBoxMain {
+internal class TestMainKt {
     @Test
-    internal fun `test your box`() {
+    internal fun `test your component`() {
         LOGGER.info { "Test 1 equals 1" }
         assertEquals(1, 1)
     }
