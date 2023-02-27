@@ -23,7 +23,7 @@ dependencies {
     api platform('com.exactpro.th2:bom:4.0.2')
 
     // the library for interaction with infra API
-    implementation 'com.exactpro.th2:common:3.42.0'
+    implementation 'com.exactpro.th2:common:3.44.1'
 
     // Logging. All versions are specified in BOM dependency
     implementation "org.slf4j:slf4j-api"
